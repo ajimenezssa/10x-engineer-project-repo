@@ -121,6 +121,40 @@ def update_prompt(prompt_id: str, prompt_data: PromptUpdate):
 # NOTE: PATCH endpoint is missing! Students need to implement this.
 # It should allow partial updates (only update provided fields)
 
+@app.patch("/prompts/{prompt_id}", response_model=Prompt)
+def partial_update_prompt(prompt_id: str, prompt_data: PromptUpdate):
+    """
+    Partially update an existing Prompt record. Only updates the fields
+    provided in `prompt_data`.
+    
+    :param prompt_id: The ID of the prompt to update.
+    :param prompt_data: A PromptUpdate object with optional fields for update.
+    :return: The updated Prompt object.
+    """
+    # Step 1: Fetch the existing prompt to be updated
+    existing = storage.get_prompt(prompt_id)
+    
+    if not existing:
+        raise HTTPException(status_code=404, detail="Prompt not found")
+    
+    # Step 2: Validate the collection if collection_id is provided
+    if prompt_data.collection_id is not None:
+        collection = storage.get_collection(prompt_data.collection_id)
+        if not collection:
+            raise HTTPException(status_code=400, detail="Collection not found")
+    
+    # Step 3: Update only the fields provided by the user
+    # Create a dictionary of the updates to perform
+    updates = {key: value for key, value in prompt_data.__dict__.items() if value is not None}
+
+    # Update the existing prompt object with the new values
+    for key, value in updates.items():
+        setattr(existing, key, value)
+
+    # Always update the updated_at field
+    existing.updated_at = get_current_time()
+    # Step 4: Save the updated prompt using storage method
+    return storage.update_prompt(prompt_id, existing)
 
 @app.delete("/prompts/{prompt_id}", status_code=204)
 def delete_prompt(prompt_id: str):
