@@ -157,6 +157,8 @@ class TestCollections:
         NOTE: Bug #4 - prompts become orphaned after collection deletion.
         This test documents the current (buggy) behavior.
         After fixing, update the test to verify correct behavior.
+
+        Verifies that prompts are not orphaned, and their collection_id is set to None after collection deletion.
         """
         # Create collection
         col_response = client.post("/collections", json=sample_collection_data)
@@ -172,8 +174,12 @@ class TestCollections:
         
         # The prompt still exists but has invalid collection_id
         # This is Bug #4 - should be handled properly
+
+        # Verify that the prompt still exists
         prompts = client.get("/prompts").json()["prompts"]
-        if prompts:
-            # Prompt exists with orphaned collection_id
-            assert prompts[0]["collection_id"] == collection_id
-            # After fix, collection_id should be None or prompt should be deleted
+        assert any(prompt["id"] == prompt_id for prompt in prompts), "The prompt should still exist."
+
+        # Verify that the prompt’s collection_id is now None
+        for prompt in prompts:
+            if prompt["id"] == prompt_id:
+                assert prompt["collection_id"] is None, "The prompt's collection_id should be None."
