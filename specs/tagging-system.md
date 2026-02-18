@@ -28,7 +28,7 @@ The main objective of the tagging system is to provide users with the ability to
 
 - **Performance Optimization**: Ensure that the tagging system is optimized for performance, with indexing and efficient query handling for fast search and retrieval operations.
 
-# User Stories
+## User Stories
 
 
 1. **As a user, I want to create new tags, so that I can categorize my prompts effectively.**
@@ -59,7 +59,7 @@ The main objective of the tagging system is to provide users with the ability to
      - Given I select a tag for deletion, when I confirm the action, then the tag should be removed and no longer available for new or existing prompts.
      - Given a tag is associated with one or more prompts, when I attempt to delete it, then I should be prompted with a warning about its associations.
 
-# Tagging System Data Model
+## Data Model
 
 The tagging system involves creating a data model that supports flexible many-to-many relationships between prompts and tags. This model facilitates efficient tagging, retrieval, and management of prompt data.
 
@@ -111,13 +111,13 @@ CREATE TABLE PromptsTags (
 );
 ```
 
-## Explanation
+### Explanation
 
 - **Tags Table**: Holds data for each tag, ensuring tag names are unique to avoid confusion.
 - **PromptsTags Table**: Serves as a junction to express the many-to-many relationship between prompts and tags. The composite primary key ensures that each prompt-tag pair is unique, while foreign key constraints maintain referential integrity.
 - **Data Integrity and Navigation**: The schema allows for efficient querying of prompts by tag and vice versa, supporting complex retrieval, filtering, and categorization needs.
 
-# Tagging System API Endpoint Specifications
+## API Endpoint Specifications
 
 All API endpoints should adhere to RESTful conventions and utilize standard HTTP methods. Endpoints should return appropriate status codes and adhere to common practices for request and response format.
 
@@ -274,9 +274,7 @@ All API endpoints should adhere to RESTful conventions and utilize standard HTTP
     ```json
     { "error": "At least one valid tag ID is required for filtering" }
 
-# Search and Filter Requirements
-
-## Logic for Filtering Prompts
+## Search and Filter Requirements
 
 ### Filtering by Single Tag
 - **Requirement**: Allow users to filter prompts by a single tag, returning all prompts associated with that tag.
@@ -288,7 +286,7 @@ All API endpoints should adhere to RESTful conventions and utilize standard HTTP
   - **Any Match**: Use an `OR` condition in the query to return prompts tagged with any of the provided tag IDs.
   - **All Match**: Use an `AND` condition to fetch prompts that are associated with all specified tag IDs. This may require aggregation and filtering based on the count of matched tags.
 
-## Partial Matches and Search Functionality
+### Partial Matches and Search Functionality
 
 ### Partial Tag Matches
 - **Requirement**: Enable searching for tags using partial strings, useful for auto-complete functionality or flexible search.
