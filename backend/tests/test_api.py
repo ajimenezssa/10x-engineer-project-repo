@@ -128,6 +128,27 @@ class TestPrompts:
         # Newest (Second) should be first
         assert prompts[0]["title"] == "Second"  # Will fail until Bug #3 fixed
 
+    def test_patch_prompt(self, client: TestClient, sample_prompt_data):
+        # Create a prompt first
+        create_response = client.post("/prompts", json=sample_prompt_data)
+        assert create_response.status_code == 201
+        prompt_id = create_response.json()["id"]
+        original_title = create_response.json()["title"]
+        original_content = create_response.json()["content"]
+
+        # Partially update the content, assuming PATCH endpoint accepts partial updates
+        updated_content = "Partially updated content"
+        patch_data = {"content": updated_content}
+        patch_response = client.patch(f"/prompts/{prompt_id}", json=patch_data)
+        assert patch_response.status_code == 200
+
+        # Get the updated prompt
+        get_response = client.get(f"/prompts/{prompt_id}")
+        data = get_response.json()
+        assert data["id"] == prompt_id
+        assert data["title"] == original_title
+        assert data["content"] == updated_content
+        assert data["content"] != original_content  # Ensure the content field was updated
 
 class TestCollections:
     """Tests for collection endpoints."""
@@ -183,3 +204,24 @@ class TestCollections:
         for prompt in prompts:
             if prompt["id"] == prompt_id:
                 assert prompt["collection_id"] is None, "The prompt's collection_id should be None."
+
+    def test_get_collection_success(self, client: TestClient, sample_collection_data):
+        # Create a new collection
+        create_response = client.post("/collections", json=sample_collection_data)
+        assert create_response.status_code == 201
+        created_collection = create_response.json()
+        
+        # Retrieve the collection by its ID
+        collection_id = created_collection["id"]
+        get_response = client.get(f"/collections/{collection_id}")
+        
+        # Assert the status code
+        assert get_response.status_code == 200
+        
+        # Assert fields match
+        retrieved_collection = get_response.json()
+        assert retrieved_collection["id"] == created_collection["id"]
+        assert retrieved_collection["name"] == created_collection["name"]
+        # Add additional assertions if there are more fields, e.g., description, created_at, etc.
+        # assert retrieved_collection["description"] == created_collection["description"]
+        # assert retrieved_collection["created_at"] == created_collection["created_at"]
