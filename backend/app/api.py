@@ -178,44 +178,56 @@ def update_prompt(prompt_id: str, prompt_data: PromptUpdate):
 # NOTE: PATCH endpoint is missing! Students need to implement this.
 # It should allow partial updates (only update provided fields)
 
+from fastapi import Body, HTTPException
+
 @app.patch("/prompts/{prompt_id}", response_model=Prompt)
-def partial_update_prompt(prompt_id: str, prompt_data: PromptUpdate):
-    """Partially update an existing Prompt record. Only updates provided fields.
+def partial_update_prompt(prompt_id: str, prompt_data: dict = Body(...)):
+    """Partially update an existing Prompt with only the fields provided.
+
+    This endpoint allows clients to update one or more fields of a Prompt
+    without sending the full object. Only the fields included in the request
+    body will be updated. The `updated_at` timestamp is always refreshed.
 
     Args:
-        prompt_id (str): The ID of the prompt to update.
-        prompt_data (PromptUpdate): A PromptUpdate object with optional fields for update.
-
+        prompt_id (str): The ID of the Prompt to update.
+        prompt_data (dict, optional): A dictionary containing the fields to update.
+            Example: {"title": "New title", "content": "Updated content"}
+    
     Returns:
-        Prompt: The updated Prompt object.
+        Prompt: The updated Prompt object with all current fields.
 
     Raises:
-        HTTPException: If the prompt or collection is not found, raises 404/400.
+        HTTPException: 
+            404: If the prompt with the given ID does not exist.
+            400: If `collection_id` is provided but the collection does not exist.
 
+    Notes:
+        1. Fetches the existing Prompt from storage.
+        2. Validates the `collection_id` if it exists in the input.
+        3. Iterates over all provided fields and updates only valid, non-None fields.
+        4. Always updates `updated_at` to the current UTC time.
+        5. Saves the updated prompt using the storage layer and returns it.
     """
-    # Step 1: Fetch the existing prompt to be updated
+    # Step 1: Fetch existing prompt
     existing = storage.get_prompt(prompt_id)
-    
     if not existing:
         raise HTTPException(status_code=404, detail="Prompt not found")
-    
-    # Step 2: Validate the collection if collection_id is provided
-    if prompt_data.collection_id is not None:
-        collection = storage.get_collection(prompt_data.collection_id)
+
+    # Step 2: Validate collection_id if provided
+    if "collection_id" in prompt_data and prompt_data["collection_id"] is not None:
+        collection = storage.get_collection(prompt_data["collection_id"])
         if not collection:
             raise HTTPException(status_code=400, detail="Collection not found")
-    
-    # Step 3: Update only the fields provided by the user
-    # Create a dictionary of the updates to perform
-    updates = {key: value for key, value in prompt_data.__dict__.items() if value is not None}
 
-    # Update the existing prompt object with the new values
-    for key, value in updates.items():
-        setattr(existing, key, value)
+    # Step 3: Update only the fields provided
+    for key, value in prompt_data.items():
+        if hasattr(existing, key) and value is not None:
+            setattr(existing, key, value)
 
-    # Always update the updated_at field
+    # Step 4: Update timestamp
     existing.updated_at = get_current_time()
-    # Step 4: Save the updated prompt using storage method
+
+    # Step 5: Save updated prompt
     return storage.update_prompt(prompt_id, existing)
 
 @app.delete("/prompts/{prompt_id}", status_code=204)
