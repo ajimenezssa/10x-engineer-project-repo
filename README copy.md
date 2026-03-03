@@ -78,14 +78,19 @@ promptlab/
 ├── backend/
 │   ├── app/
 │   │   ├── __init__.py
-│   │   ├── api.py              # FastAPI routes (has bugs!)
+│   │   ├── api.py              # FastAPI routes
 │   │   ├── models.py           # Pydantic models
 │   │   ├── storage.py          # In-memory storage
 │   │   └── utils.py            # Helper functions
+│   │   └── tags.py             # New spec
 │   ├── tests/
 │   │   ├── __init__.py
 │   │   ├── test_api.py         # Basic tests
 │   │   └── conftest.py         # Test fixtures
+│   │   └── test_models.py      # Basic tests
+│   │   └── test_storage.py     # Basic tests
+│   │   └── test_tags.py        # Basic tests
+│   │   └── test_utils.py       # Basic tests
 │   ├── main.py                 # Entry point
 │   └── requirements.txt
 │
