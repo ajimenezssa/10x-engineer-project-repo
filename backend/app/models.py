@@ -2,7 +2,7 @@
 
 from datetime import datetime
 from typing import Optional, List
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from uuid import uuid4
 
 
@@ -47,6 +47,7 @@ class PromptBase(BaseModel):
     description: Optional[str] = Field(None, max_length=500)
     collection_id: Optional[str] = None
 
+    model_config = ConfigDict(from_attributes=True)
 
 class PromptCreate(PromptBase):
     """Model for creating a new Prompt, inheriting from PromptBase."""
@@ -74,8 +75,7 @@ class Prompt(PromptBase):
     created_at: datetime = Field(default_factory=get_current_time)
     updated_at: datetime = Field(default_factory=get_current_time)
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 # ============== Collection Models ==============
@@ -90,6 +90,8 @@ class CollectionBase(BaseModel):
     
     name: str = Field(..., min_length=1, max_length=100)
     description: Optional[str] = Field(None, max_length=500)
+
+    model_config = ConfigDict(from_attributes=True)
 
 
 class CollectionCreate(CollectionBase):
@@ -111,9 +113,7 @@ class Collection(CollectionBase):
     id: str = Field(default_factory=generate_id)
     created_at: datetime = Field(default_factory=get_current_time)
 
-    class Config:
-        from_attributes = True
-
+    model_config = ConfigDict(from_attributes=True)
 
 # ============== Response Models ==============
 
@@ -128,6 +128,8 @@ class PromptList(BaseModel):
     prompts: List[Prompt]
     total: int
 
+    model_config = ConfigDict(from_attributes=True)
+
 
 class CollectionList(BaseModel):
     """Response model for listing Collections.
@@ -140,6 +142,8 @@ class CollectionList(BaseModel):
     collections: List[Collection]
     total: int
 
+    model_config = ConfigDict(from_attributes=True)
+
 
 class HealthResponse(BaseModel):
     """Response model for health checks.
@@ -151,3 +155,5 @@ class HealthResponse(BaseModel):
     
     status: str
     version: str
+
+    model_config = ConfigDict(from_attributes=True)
