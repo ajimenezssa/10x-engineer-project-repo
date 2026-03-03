@@ -23,8 +23,6 @@ PromptLab is an internal tool for AI engineers to **store, organize, and manage 
 
 PromptLab is an API server utilizing FastAPI, aimed at the efficient management of AI prompts. Designed as a "Postman for Prompts," it provides a RESTful API that allows AI engineers to store, organize, tag, search, and manage the lifecycle of AI prompts.
 
-... rest of the content ...
-
 The platform exists to facilitate prompt engineering processes by offering a structured environment to handle prompts programmatically. It is intended for AI engineers and development teams dealing with prompt engineering, particularly those needing a programmatic approach to managing prompt data effectively.
 
 ### Purpose and Scope

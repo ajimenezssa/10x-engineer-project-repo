@@ -6,6 +6,7 @@ Students should expand these tests significantly in Week 3.
 
 import pytest
 from fastapi.testclient import TestClient
+import string
 
 
 class TestHealth:
@@ -225,3 +226,213 @@ class TestCollections:
         # Add additional assertions if there are more fields, e.g., description, created_at, etc.
         # assert retrieved_collection["description"] == created_collection["description"]
         # assert retrieved_collection["created_at"] == created_collection["created_at"]
+
+class TestPromptsErrors:
+    """Error tests for prompt endpoints."""
+    
+    # GET
+    def test_get_prompt_404(self, client: TestClient):
+        response = client.get("/prompts/nonexistent-id")
+        assert response.status_code == 404
+
+    # POST
+    def test_post_prompt_invalid_collection_id(self, client: TestClient, sample_prompt_data):
+        invalid_data = {**sample_prompt_data, "collection_id": "invalid-id"}
+        response = client.post("/prompts", json=invalid_data)
+        assert response.status_code == 400
+
+    def test_post_prompt_missing_fields(self, client: TestClient):
+        incomplete_data = {}  # Assuming required fields are missing
+        response = client.post("/prompts", json=incomplete_data)
+        assert response.status_code == 422
+
+    # PUT
+    def test_put_prompt_404(self, client: TestClient, sample_prompt_data):
+        response = client.put(f"/prompts/nonexistent-id", json=sample_prompt_data)
+        assert response.status_code == 404
+
+    def test_put_prompt_invalid_collection_id(self, client: TestClient, sample_prompt_data, sample_collection_data):
+        create_response = client.post("/prompts", json=sample_prompt_data)
+        prompt_id = create_response.json()["id"]
+        invalid_data = {**sample_prompt_data, "collection_id": "invalid-id"}
+        response = client.put(f"/prompts/{prompt_id}", json=invalid_data)
+        assert response.status_code == 400
+
+    # PATCH
+    def test_patch_prompt_404(self, client: TestClient):
+        patch_data = {"title": "New Title"}
+        response = client.patch("/prompts/nonexistent-id", json=patch_data)
+        assert response.status_code == 404
+
+    def test_patch_prompt_invalid_collection_id(self, client: TestClient, sample_prompt_data):
+        create_response = client.post("/prompts", json=sample_prompt_data)
+        prompt_id = create_response.json()["id"]
+        invalid_data = {"collection_id": "invalid-id"}
+        response = client.patch(f"/prompts/{prompt_id}", json=invalid_data)
+        assert response.status_code == 400
+
+    # DELETE
+    def test_delete_prompt_404(self, client: TestClient):
+        response = client.delete("/prompts/nonexistent-id")
+        assert response.status_code == 404
+
+class TestPromptsEdgeCases:
+    """Edge-case tests for prompt endpoints."""
+
+    def test_create_prompt_empty_strings(self, client: TestClient):
+        data = {"title": "", "content": "", "description": ""}
+        response = client.post("/prompts", json=data)
+        assert response.status_code == 422  # Should fail validation
+
+    def test_create_prompt_whitespace_strings(self, client: TestClient):
+        data = {"title": "   ", "content": "   ", "description": "   "}
+        response = client.post("/prompts", json=data)
+        assert response.status_code == 201  # API allows whitespace strings
+
+    def test_create_prompt_special_characters(self, client: TestClient):
+        data = {
+            "title": "!@#$%^&*()_+{}|:\"<>?",
+            "content": "<script>alert('x')</script>",
+            "description": "~`[];',./"
+        }
+        response = client.post("/prompts", json=data)
+        assert response.status_code == 201
+        resp_data = response.json()
+        assert resp_data["title"] == data["title"]
+        assert resp_data["content"] == data["content"]
+
+    def test_create_prompt_unicode_emojis(self, client: TestClient):
+        data = {
+            "title": "💡🔥🚀",
+            "content": "Content with emojis 📝🎯",
+            "description": "Description ✨"
+        }
+        response = client.post("/prompts", json=data)
+        assert response.status_code == 201
+        resp_data = response.json()
+        assert resp_data["title"] == data["title"]
+        assert resp_data["content"] == data["content"]
+
+    def test_create_prompt_very_long_strings(self, client: TestClient):
+        long_string = "x" * 5000  # Adjust length depending on DB limits
+        data = {"title": long_string, "content": long_string, "description": long_string}
+        response = client.post("/prompts", json=data)
+        assert response.status_code in [201, 422]  # 422 if too long for DB
+        
+
+class TestCollectionsEdgeCases:
+    """Edge-case tests for collection endpoints."""
+
+    def test_create_collection_empty_name(self, client: TestClient):
+        data = {"name": ""}
+        response = client.post("/collections", json=data)
+        assert response.status_code == 422
+
+    def test_create_collection_whitespace_name(self, client: TestClient):
+        data = {"name": "   "}
+        response = client.post("/collections", json=data)
+        assert response.status_code == 201  # API allows whitespace strings
+
+    def test_create_collection_special_characters(self, client: TestClient):
+        data = {"name": "!@#$%^&*()_+{}|:\"<>?"}
+        response = client.post("/collections", json=data)
+        assert response.status_code == 201
+        assert response.json()["name"] == data["name"]
+
+    def test_create_collection_unicode_emojis(self, client: TestClient):
+        data = {"name": "📚🖊️"}
+        response = client.post("/collections", json=data)
+        assert response.status_code == 201
+        assert response.json()["name"] == data["name"]
+
+    def test_create_collection_very_long_name(self, client: TestClient):
+        long_name = "x" * 5000
+        data = {"name": long_name}
+        response = client.post("/collections", json=data)
+        assert response.status_code in [201, 422]  # 422 if too long for DB
+
+class TestPromptsQueryParams:
+    """Tests for query parameters on prompt endpoints (sorting, filtering)."""
+
+    def test_sort_prompts_desc(self, client: TestClient, sample_prompt_data):
+        """Prompts should be sorted newest first (descending) by default."""
+        import time
+
+        # Create two prompts with slight delay
+        prompt1 = {**sample_prompt_data, "title": "First Prompt"}
+        prompt2 = {**sample_prompt_data, "title": "Second Prompt"}
+        client.post("/prompts", json=prompt1)
+        time.sleep(0.1)
+        client.post("/prompts", json=prompt2)
+
+        response = client.get("/prompts")
+        prompts = response.json()["prompts"]
+        assert prompts[0]["title"] == "Second Prompt"
+        assert prompts[1]["title"] == "First Prompt"
+
+    def test_sort_prompts_asc(self, client: TestClient, sample_prompt_data):
+        """Prompts should be returned newest first (descending) because asc not supported yet."""
+        import time
+
+        prompt1 = {**sample_prompt_data, "title": "Oldest Prompt"}
+        prompt2 = {**sample_prompt_data, "title": "Newest Prompt"}
+        client.post("/prompts", json=prompt1)
+        time.sleep(0.1)
+        client.post("/prompts", json=prompt2)
+
+        response = client.get("/prompts?sort=asc")  # API ignores 'asc'
+        prompts = response.json()["prompts"]
+        # Newest comes first because API only supports descending
+        assert prompts[0]["title"] == "Newest Prompt"
+        assert prompts[1]["title"] == "Oldest Prompt"
+
+    def test_filter_by_collection(self, client: TestClient, sample_prompt_data, sample_collection_data):
+        """Filter prompts by collection_id."""
+        # Create collections
+        col1 = client.post("/collections", json={"name": "Col 1"}).json()
+        col2 = client.post("/collections", json={"name": "Col 2"}).json()
+
+        # Create prompts in different collections
+        prompt1 = {**sample_prompt_data, "title": "Prompt 1", "collection_id": col1["id"]}
+        prompt2 = {**sample_prompt_data, "title": "Prompt 2", "collection_id": col2["id"]}
+        client.post("/prompts", json=prompt1)
+        client.post("/prompts", json=prompt2)
+
+        response = client.get(f"/prompts?collection_id={col1['id']}")
+        prompts = response.json()["prompts"]
+        assert all(p["collection_id"] == col1["id"] for p in prompts)
+        assert any(p["title"] == "Prompt 1" for p in prompts)
+        assert all(p["title"] != "Prompt 2" for p in prompts)
+
+    def test_filter_by_search(self, client: TestClient, sample_prompt_data):
+        """Filter prompts by search query in title/content."""
+        prompt1 = {**sample_prompt_data, "title": "Alpha Prompt", "content": "Content A"}
+        prompt2 = {**sample_prompt_data, "title": "Beta Prompt", "content": "Content B"}
+        client.post("/prompts", json=prompt1)
+        client.post("/prompts", json=prompt2)
+
+        response = client.get("/prompts?search=Alpha")
+        prompts = response.json()["prompts"]
+        assert all("Alpha" in p["title"] or "Alpha" in p["content"] for p in prompts)
+        assert any(p["title"] == "Alpha Prompt" for p in prompts)
+        assert all(p["title"] != "Beta Prompt" for p in prompts)
+
+    def test_combined_filter_sort(self, client: TestClient, sample_prompt_data, sample_collection_data):
+        """Filter by collection and sort descending."""
+        import time
+
+        # Create collection
+        collection = client.post("/collections", json={"name": "Col"}).json()
+
+        # Create prompts in collection
+        prompt1 = {**sample_prompt_data, "title": "Old Prompt", "collection_id": collection["id"]}
+        prompt2 = {**sample_prompt_data, "title": "New Prompt", "collection_id": collection["id"]}
+        client.post("/prompts", json=prompt1)
+        time.sleep(0.1)
+        client.post("/prompts", json=prompt2)
+
+        response = client.get(f"/prompts?collection_id={collection['id']}&sort=desc")
+        prompts = response.json()["prompts"]
+        assert all(p["collection_id"] == collection["id"] for p in prompts)
+        assert prompts[0]["title"] == "New Prompt"
+        assert prompts[1]["title"] == "Old Prompt"
