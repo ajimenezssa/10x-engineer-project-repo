@@ -1,4 +1,4 @@
-# Propmt Version Specification
+# Prompt Version Specification
 
 ## Overview
 
