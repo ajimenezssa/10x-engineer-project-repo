@@ -5,6 +5,7 @@ from typing import Optional, List
 from pydantic import BaseModel, Field, ConfigDict
 from uuid import uuid4
 
+# ==============Functionality ==============
 
 def generate_id() -> str:
     """Generate a unique identifier for models.
@@ -29,6 +30,13 @@ def get_current_time() -> datetime:
     """
     return datetime.utcnow()
 
+# ============== Tag Model ==============
+class Tag(BaseModel):
+    id: str = Field(default_factory=generate_id)
+    name: str
+    description: Optional[str] = None
+
+    model_config = ConfigDict(from_attributes=True)
 
 # ============== Prompt Models ==============
 
@@ -75,8 +83,9 @@ class Prompt(PromptBase):
     created_at: datetime = Field(default_factory=get_current_time)
     updated_at: datetime = Field(default_factory=get_current_time)
 
-    model_config = ConfigDict(from_attributes=True)
+    tags: List[Tag] = Field(default_factory=list)
 
+    model_config = ConfigDict(from_attributes=True)
 
 # ============== Collection Models ==============
 
