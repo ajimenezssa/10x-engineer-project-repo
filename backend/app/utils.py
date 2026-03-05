@@ -2,6 +2,11 @@
 
 from typing import List
 from app.models import Prompt
+from datetime import datetime
+
+def get_current_time():
+    """Return the current UTC time."""
+    return datetime.utcnow()
 
 
 def sort_prompts_by_date(prompts: List[Prompt], descending: bool = True) -> List[Prompt]:

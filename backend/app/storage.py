@@ -180,3 +180,34 @@ class Storage:
 
 # Global storage instance
 storage = Storage()
+
+from app.models import Prompt
+from app.utils import get_current_time
+import uuid
+
+# Sample prompts
+storage.create_prompt(
+    Prompt(
+        id=str(uuid.uuid4()),
+        title="Translate Text",
+        content="Translate: {{input}}",
+        description="Translate input text to another language",
+        collection_id=None,
+        created_at=get_current_time(),
+        updated_at=get_current_time(),
+        tags=[]
+    )
+)
+
+storage.create_prompt(
+    Prompt(
+        id=str(uuid.uuid4()),
+        title="Summarize Text",
+        content="Summarize: {{input}}",
+        description="Summarize any text input",
+        collection_id=None,
+        created_at=get_current_time(),
+        updated_at=get_current_time(),
+        tags=[]
+    )
+)

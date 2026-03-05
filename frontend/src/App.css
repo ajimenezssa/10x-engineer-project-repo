@@ -1,0 +1,11 @@
+/* frontend/src/App.css */
+
+/* Tailwind directives */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Optional custom styles */
+body {
+  font-family: sans-serif;
+}
