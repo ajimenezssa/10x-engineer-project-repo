@@ -15,7 +15,7 @@ function App() {
 
   return (
     <div className="min-h-screen bg-white p-8">
-      <h1 className="text-3xl font-bold mb-6">PromptLab</h1>
+      <h1 className="text-3xl font-bold mb-6">Prompts</h1>
 
       {prompts.length === 0 ? (
         <p>No prompts found</p>
