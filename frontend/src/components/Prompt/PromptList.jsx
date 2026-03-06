@@ -12,13 +12,13 @@ function PromptList({ prompts, onPromptClick, onPromptEdit, onPromptDelete }) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       {promptArray.map((prompt) => (
-        <PromptCard
-          key={prompt.id}
-          prompt={prompt}
-          onClick={() => onPromptClick && onPromptClick(prompt)}
-          onEdit={() => onPromptEdit && onPromptEdit(prompt)}
-          onDelete={() => onPromptDelete && onPromptDelete(prompt)}
-        />
+<PromptCard
+  key={prompt.id}
+  prompt={prompt}
+  onClick={() => onPromptClick && onPromptClick(prompt)}
+  onEdit={() => onPromptEdit && onPromptEdit(prompt)}
+  onDelete={() => onPromptDelete && onPromptDelete(prompt)} // pass full object
+/>
       ))}
     </div>
   );
