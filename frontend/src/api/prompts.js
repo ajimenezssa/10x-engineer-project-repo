@@ -1,26 +1,39 @@
+// src/api/prompts.js
 import { apiClient } from "./client";
 
-// Fetch all prompts
-export function getPrompts() {
+// GET all prompts
+export async function getPrompts() {
   return apiClient("/prompts");
 }
 
-// Fetch single prompt by ID
-export function getPrompt(id) {
+// GET single prompt by ID
+export async function getPrompt(id) {
+  if (!id) throw new Error("Prompt ID is required");
   return apiClient(`/prompts/${id}`);
 }
 
-// Create new prompt
-export function createPrompt(data) {
-  return apiClient("/prompts", { method: "POST", body: data });
+// CREATE a new prompt
+export async function createPrompt(data) {
+  if (!data) throw new Error("Prompt data is required");
+  return apiClient("/prompts", {
+    method: "POST",
+    body: data, // client.js will stringify JSON
+  });
 }
 
-// Update existing prompt
-export function updatePrompt(id, data) {
-  return apiClient(`/prompts/${id}`, { method: "PUT", body: data });
+// UPDATE an existing prompt
+export async function updatePrompt(id, data) {
+  if (!id) throw new Error("Prompt ID is required");
+  if (!data) throw new Error("Prompt data is required");
+  return apiClient(`/prompts/${id}`, {
+    method: "PUT",
+    body: data,
+  });
 }
 
-// Delete prompt
-export function deletePrompt(id) {
-  return apiClient(`/prompts/${id}`, { method: "DELETE" });
+// DELETE a prompt
+export async function deletePrompt(id) {
+  if (!id) throw new Error("Prompt ID is required");
+  await apiClient(`/prompts/${id}`, { method: "DELETE" });
+  return true; // frontend can update state
 }
