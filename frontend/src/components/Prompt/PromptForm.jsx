@@ -1,76 +1,45 @@
 import React, { useState } from "react";
 
-function PromptForm({ prompt = {}, onSubmit, onCancel }) {
-  const [title, setTitle] = useState(prompt.title || "");
-  const [content, setContent] = useState(prompt.content || "");
-  const [description, setDescription] = useState(prompt.description || "");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+function PromptForm({ prompt = null, onSubmit, onCancel }) {
+  // Initialize state from backend fields
+  const [title, setTitle] = useState(prompt ? prompt.title : "");
+  const [content, setContent] = useState(prompt ? prompt.content : "");
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    if (!title || !content) {
-      setError("Title and content are required.");
-      return;
-    }
-    setLoading(true);
-    try {
-      await onSubmit({ title, content, description });
-    } catch (err) {
-      setError("Failed to submit prompt.");
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
+    // Send data matching backend model
+    onSubmit({ title, content });
   };
 
   return (
-    <form className="bg-light p-6 rounded shadow-md space-y-4" onSubmit={handleSubmit}>
-      {error && <p className="text-red-500">{error}</p>}
-
-      <div>
-        <label className="block text-dark font-medium mb-1">Title</label>
-        <input
-          type="text"
-          className="w-full p-2 border border-dark rounded"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          required
-        />
-      </div>
-
-      <div>
-        <label className="block text-dark font-medium mb-1">Content</label>
-        <textarea
-          className="w-full p-2 border border-dark rounded"
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-          required
-        />
-      </div>
-
-      <div>
-        <label className="block text-dark font-medium mb-1">Description</label>
-        <textarea
-          className="w-full p-2 border border-dark rounded"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-        />
-      </div>
-
-      <div className="flex space-x-2">
+    <form onSubmit={handleSubmit} className="flex flex-col gap-2 mb-4">
+      <input
+        className="border p-2 rounded"
+        type="text"
+        placeholder="Prompt Title"
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+        required
+      />
+      <textarea
+        className="border p-2 rounded"
+        placeholder="Prompt Content"
+        value={content}
+        onChange={(e) => setContent(e.target.value)}
+        required
+      />
+      <div className="flex gap-2">
         <button
           type="submit"
-          className="px-4 py-2 bg-primary text-white rounded hover:bg-accent transition"
-          disabled={loading}
+          className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
         >
-          {loading ? "Saving..." : "Save"}
+          {prompt ? "Update" : "Create"}
         </button>
         {onCancel && (
           <button
             type="button"
+            className="px-3 py-1 bg-gray-300 rounded hover:bg-gray-400"
             onClick={onCancel}
-            className="px-4 py-2 bg-secondary text-white rounded hover:bg-accent transition"
           >
             Cancel
           </button>

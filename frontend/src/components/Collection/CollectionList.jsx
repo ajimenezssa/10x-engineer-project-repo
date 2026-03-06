@@ -1,29 +1,27 @@
 import React from "react";
 
 function CollectionList({ collections = [], onDeleteCollection }) {
-  if (collections.length === 0) {
-    return <p className="text-gray-500">No collections yet.</p>;
-  }
+  if (!collections.length) return <p className="text-dark">No collections yet.</p>;
 
   return (
-    <div className="flex flex-col gap-2">
+    <ul className="flex flex-wrap gap-3">
       {collections.map((collection) => (
-        <div
+        <li
           key={collection.id}
-          className="flex justify-between items-center p-2 border rounded hover:bg-gray-50"
+          className="border p-2 rounded flex items-center gap-2"
         >
           <span>{collection.name}</span>
-          {onDeleteCollection && collection.id && (
+          {onDeleteCollection && (
             <button
-              className="text-red-500 hover:text-red-700 font-semibold"
-              onClick={() => onDeleteCollection(collection.id)}
+            onClick={() => onDeleteCollection(collection)}
+            className="text-red-500 hover:text-red-700"
             >
-              Delete
+            Delete
             </button>
           )}
-        </div>
+        </li>
       ))}
-    </div>
+    </ul>
   );
 }
 
