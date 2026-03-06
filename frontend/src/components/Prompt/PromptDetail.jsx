@@ -1,44 +1,46 @@
 import React from "react";
-import Modal from "../Shared/Modal"; // optional modal wrapper
 
 function PromptDetail({ prompt, onClose, onEdit, onDelete }) {
-  if (!prompt) return null;
-
   return (
-    <Modal onClose={onClose}>
-      <div className="p-4">
-        <h2 className="text-2xl font-bold mb-2">{prompt.name}</h2>
-        <p className="text-gray-700 mb-4">{prompt.description}</p>
-        {prompt.template && (
-          <pre className="bg-gray-100 p-2 rounded mb-4">{prompt.template}</pre>
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+      <div className="bg-white p-6 rounded shadow-lg w-96">
+        <h2 className="text-xl font-bold mb-2">{prompt.title}</h2>
+
+        {/* Collection */}
+        {prompt.collection?.name && (
+          <p className="text-sm text-gray-500 mb-2">
+            Collection: {prompt.collection.name}
+          </p>
         )}
 
-        <div className="flex justify-end gap-2">
+        <p className="text-gray-700 mb-4">{prompt.content}</p>
+
+        <div className="flex gap-2 justify-end">
           {onEdit && (
             <button
-              className="px-3 py-1 bg-yellow-400 rounded hover:bg-yellow-500 text-white"
-              onClick={() => onEdit(prompt)}
+              onClick={onEdit}
+              className="px-3 py-1 bg-yellow-400 text-white rounded hover:bg-yellow-500"
             >
               Edit
             </button>
           )}
           {onDelete && (
             <button
-              className="px-3 py-1 bg-red-500 rounded hover:bg-red-600 text-white"
-              onClick={() => onDelete(prompt)}
+              onClick={onDelete}
+              className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
             >
               Delete
             </button>
           )}
           <button
-            className="px-3 py-1 bg-gray-300 rounded hover:bg-gray-400"
             onClick={onClose}
+            className="px-3 py-1 bg-gray-300 rounded hover:bg-gray-400"
           >
             Close
           </button>
         </div>
       </div>
-    </Modal>
+    </div>
   );
 }
 

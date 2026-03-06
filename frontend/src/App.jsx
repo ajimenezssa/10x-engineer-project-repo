@@ -33,6 +33,9 @@ function App() {
   const [selectedPrompt, setSelectedPrompt] = useState(null);
   const [showPromptForm, setShowPromptForm] = useState(false);
 
+  // --- Collection filter ---
+  const [selectedCollectionId, setSelectedCollectionId] = useState("");
+
   // --- Fetch prompts and collections ---
   useEffect(() => {
     async function fetchData() {
@@ -59,7 +62,7 @@ function App() {
   // --- Collections CRUD ---
   const handleAddCollection = async (newCollection) => {
     try {
-      const created = await createCollection(newCollection); // pass object
+      const created = await createCollection(newCollection);
       setCollections((prev) => [...prev, created]);
     } catch (err) {
       alert("Failed to create collection: " + err.message);
@@ -70,7 +73,7 @@ function App() {
     if (!window.confirm(`Delete collection "${collection.name}"?`)) return;
 
     try {
-      await deleteCollection(collection.id); // use id exactly from object
+      await deleteCollection(collection.id);
       setCollections((prev) => prev.filter((c) => c.id !== collection.id));
     } catch (err) {
       alert("Failed to delete collection: " + err.message);
@@ -93,12 +96,24 @@ function App() {
       let result;
       if (editingPrompt) {
         result = await updatePrompt(editingPrompt.id, data);
+
+        if (result.collection_id) {
+          const collectionObj = collections.find(c => c.id === result.collection_id);
+          result.collection = collectionObj || null;
+        }
+
         setPrompts((prev) =>
           prev.map((p) => (p.id === result.id ? result : p))
         );
       } else {
         result = await createPrompt(data);
         const newPrompt = result.prompt || result;
+
+        if (newPrompt.collection_id) {
+          const collectionObj = collections.find(c => c.id === newPrompt.collection_id);
+          newPrompt.collection = collectionObj || null;
+        }
+
         setPrompts((prev) => [...prev, newPrompt]);
       }
     } catch (err) {
@@ -110,12 +125,11 @@ function App() {
   };
 
   const handleDeletePrompt = async (prompt) => {
-    if (!window.confirm(`Delete prompt "${prompt.name}"?`)) return;
+    if (!window.confirm(`Delete prompt "${prompt.title}"?`)) return;
 
     try {
       await deletePrompt(prompt.id);
       setPrompts((prev) => prev.filter((p) => p.id !== prompt.id));
-      
       if (selectedPrompt?.id === prompt.id) setSelectedPrompt(null);
     } catch (err) {
       alert("Failed to delete prompt: " + err.message);
@@ -125,7 +139,11 @@ function App() {
   const handleViewPrompt = (prompt) => setSelectedPrompt(prompt);
   const handleClosePromptDetail = () => setSelectedPrompt(null);
 
-  // --- Render ---
+  // --- Filter prompts ---
+  const filteredPrompts = selectedCollectionId
+    ? prompts.filter(p => p.collection?.id === selectedCollectionId)
+    : prompts;
+
   return (
     <Layout>
       {/* Collections Section */}
@@ -143,39 +161,61 @@ function App() {
           />
 
           {/* Prompts Section */}
-          <div className="flex items-center justify-between mt-6 mb-4">
-            <h2 className="text-2xl font-bold">Prompts</h2>
-            <button
-              className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
-              onClick={handleCreatePrompt}
+          <div className="mt-6 mb-4">
+            {/* Filter */}
+            <h2 className="text-xl font-semibold mb-2">Filter</h2>
+            <select
+              className="border p-2 rounded mb-4"
+              value={selectedCollectionId}
+              onChange={(e) => setSelectedCollectionId(e.target.value)}
             >
-              New Prompt
-            </button>
+              <option value="">All Collections</option>
+              {collections.map(c => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+
+            {/* Prompts Title + New Prompt Button */}
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-2xl font-bold">Prompts</h2>
+              <button
+                className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
+                onClick={handleCreatePrompt}
+              >
+                New Prompt
+              </button>
+            </div>
+
+            {/* Prompt Form */}
+            {showPromptForm && (
+              <PromptForm
+                prompt={editingPrompt}
+                onSubmit={handleSubmitPrompt}
+                onCancel={() => setShowPromptForm(false)}
+                collections={collections}
+              />
+            )}
+
+            {/* Prompt List */}
+            <PromptList
+              prompts={filteredPrompts || []}
+              onPromptClick={handleViewPrompt}
+              onPromptEdit={handleEditPrompt}
+              onPromptDelete={handleDeletePrompt}
+            />
+
+            {/* Prompt Detail */}
+            {selectedPrompt && (
+              <PromptDetail
+                prompt={selectedPrompt}
+                onClose={handleClosePromptDetail}
+                onEdit={handleEditPrompt}
+                onDelete={handleDeletePrompt}
+              />
+            )}
           </div>
-
-          {showPromptForm && (
-            <PromptForm
-              prompt={editingPrompt}
-              onSubmit={handleSubmitPrompt}
-              onCancel={() => setShowPromptForm(false)}
-            />
-          )}
-
-          <PromptList
-            prompts={prompts || []}
-            onPromptClick={handleViewPrompt}
-            onPromptEdit={handleEditPrompt}
-            onPromptDelete={handleDeletePrompt}
-          />
-
-          {selectedPrompt && (
-            <PromptDetail
-              prompt={selectedPrompt}
-              onClose={handleClosePromptDetail}
-              onEdit={handleEditPrompt}
-              onDelete={handleDeletePrompt}
-            />
-          )}
         </>
       )}
     </Layout>

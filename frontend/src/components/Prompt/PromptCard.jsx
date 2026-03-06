@@ -6,7 +6,15 @@ function PromptCard({ prompt, onClick, onEdit, onDelete }) {
       className="border p-4 rounded shadow hover:shadow-lg cursor-pointer"
       onClick={onClick}
     >
-      <h3 className="text-lg font-bold mb-2">{prompt.title}</h3>
+      <h3 className="text-lg font-bold mb-1">{prompt.title}</h3>
+
+      {/* Collection Name */}
+      {prompt.collection?.name && (
+        <p className="text-sm text-gray-500 mb-2">
+          Collection: {prompt.collection.name}
+        </p>
+      )}
+
       <p className="text-gray-700 mb-2">{prompt.content}</p>
 
       <div className="flex gap-2 mt-2">
