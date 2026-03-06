@@ -136,9 +136,6 @@ function App() {
     }
   };
 
-  const handleViewPrompt = (prompt) => setSelectedPrompt(prompt);
-  const handleClosePromptDetail = () => setSelectedPrompt(null);
-
   // --- Filter prompts ---
   const filteredPrompts = selectedCollectionId
     ? prompts.filter(p => p.collection?.id === selectedCollectionId)
@@ -201,7 +198,6 @@ function App() {
             {/* Prompt List */}
             <PromptList
               prompts={filteredPrompts || []}
-              onPromptClick={handleViewPrompt}
               onPromptEdit={handleEditPrompt}
               onPromptDelete={handleDeletePrompt}
             />
@@ -210,7 +206,6 @@ function App() {
             {selectedPrompt && (
               <PromptDetail
                 prompt={selectedPrompt}
-                onClose={handleClosePromptDetail}
                 onEdit={handleEditPrompt}
                 onDelete={handleDeletePrompt}
               />
