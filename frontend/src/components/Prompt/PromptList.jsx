@@ -1,18 +1,21 @@
-// src/components/Prompts/PromptList.jsx
-function PromptList({ prompts }) {
+import React from "react";
+import PromptCard from "./PromptCard";
+
+function PromptList({ prompts, onPromptClick, onPromptEdit, onPromptDelete }) {
+  if (!prompts || prompts.length === 0) {
+    return <p className="text-dark">No prompts available.</p>;
+  }
+
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       {prompts.map((prompt) => (
-        <div
+        <PromptCard
           key={prompt.id}
-          className="bg-light p-4 rounded shadow-sm hover:shadow-md transition"
-        >
-          <h3 className="text-dark font-semibold">{prompt.title}</h3>
-          <p className="text-dark mt-1">{prompt.content}</p>
-          {prompt.description && (
-            <p className="text-dark mt-1 text-sm">{prompt.description}</p>
-          )}
-        </div>
+          prompt={prompt}
+          onClick={() => onPromptClick && onPromptClick(prompt)}
+          onEdit={() => onPromptEdit && onPromptEdit(prompt)}
+          onDelete={() => onPromptDelete && onPromptDelete(prompt)}
+        />
       ))}
     </div>
   );
