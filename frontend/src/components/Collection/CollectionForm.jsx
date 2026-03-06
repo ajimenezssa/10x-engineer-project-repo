@@ -13,7 +13,7 @@ function CollectionForm({ onSubmit }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex gap-2 mb-4">
+    <form onSubmit={handleSubmit} className="flex gap-2 mb-6">
       <input
         type="text"
         value={name}
