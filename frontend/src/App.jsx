@@ -15,7 +15,6 @@ import Layout from "./components/Layout/Layout";
 import PromptList from "./components/Prompt/PromptList";
 import PromptForm from "./components/Prompt/PromptForm";
 import PromptDetail from "./components/Prompt/PromptDetail";
-
 import CollectionForm from "./components/Collection/CollectionForm";
 
 import LoadingSpinner from "./components/Shared/LoadingSpinner";
@@ -27,17 +26,14 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // --- Prompt state ---
   const [editingPrompt, setEditingPrompt] = useState(null);
   const [selectedPrompt, setSelectedPrompt] = useState(null);
   const [showPromptForm, setShowPromptForm] = useState(false);
 
-  // --- Collection state ---
   const [editingCollection, setEditingCollection] = useState(null);
   const [showCollectionForm, setShowCollectionForm] = useState(false);
   const [selectedCollectionId, setSelectedCollectionId] = useState("");
 
-  // --- Prompt search ---
   const [promptSearchQuery, setPromptSearchQuery] = useState("");
 
   // --- Fetch prompts and collections ---
@@ -68,8 +64,6 @@ function App() {
     try {
       let result;
       if (editingCollection) {
-        // For simplicity, let's reuse createCollection as updateCollection
-        // You can replace with real updateCollection API call
         result = await createCollection({ ...editingCollection, ...data });
         setCollections((prev) =>
           prev.map((c) => (c.id === result.id ? result : c))
@@ -93,7 +87,6 @@ function App() {
       await deleteCollection(collection.id);
       setCollections((prev) => prev.filter((c) => c.id !== collection.id));
 
-      // If the deleted collection was selected, reset filter
       if (selectedCollectionId === collection.id) {
         setSelectedCollectionId("");
       }
@@ -118,24 +111,20 @@ function App() {
       let result;
       if (editingPrompt) {
         result = await updatePrompt(editingPrompt.id, data);
-
         if (result.collection_id) {
           const collectionObj = collections.find(c => c.id === result.collection_id);
           result.collection = collectionObj || null;
         }
-
         setPrompts((prev) =>
           prev.map((p) => (p.id === result.id ? result : p))
         );
       } else {
         result = await createPrompt(data);
         const newPrompt = result.prompt || result;
-
         if (newPrompt.collection_id) {
           const collectionObj = collections.find(c => c.id === newPrompt.collection_id);
           newPrompt.collection = collectionObj || null;
         }
-
         setPrompts((prev) => [...prev, newPrompt]);
       }
     } catch (err) {
@@ -158,7 +147,6 @@ function App() {
     }
   };
 
-  // --- Filter prompts ---
   const filteredPrompts = prompts
     .filter(p => !selectedCollectionId || p.collection?.id === selectedCollectionId)
     .filter(p => p.title.toLowerCase().includes(promptSearchQuery.toLowerCase()));
@@ -166,11 +154,10 @@ function App() {
   return (
     <Layout>
       {/* Collections Section */}
-      <h2 className="text-2xl font-bold mb-2">Collections</h2>
+      <h2 className="text-primary text-2xl font-bold mb-2">Collections</h2>
       <div className="flex items-center gap-2 mb-4 flex-wrap">
-        {/* Collections Dropdown */}
         <select
-          className="border border-gray-300 p-1 rounded text-sm"
+          className="border border-accent p-1 rounded text-sm text-primary"
           value={selectedCollectionId}
           onChange={(e) => setSelectedCollectionId(e.target.value)}
         >
@@ -180,11 +167,10 @@ function App() {
           ))}
         </select>
 
-        {/* Edit/Delete buttons */}
         {selectedCollectionId && (
           <>
             <button
-              className="px-2 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600"
+              className="px-2 py-1 bg-accent text-white rounded hover:bg-secondary transition"
               onClick={() => {
                 const collection = collections.find(c => c.id === selectedCollectionId);
                 setEditingCollection(collection);
@@ -194,7 +180,7 @@ function App() {
               Edit
             </button>
             <button
-              className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600"
+              className="px-2 py-1 bg-primary text-white rounded hover:bg-dark transition"
               onClick={() => handleDeleteCollection(collections.find(c => c.id === selectedCollectionId))}
             >
               Delete
@@ -202,10 +188,9 @@ function App() {
           </>
         )}
 
-        {/* New Collection button */}
         {!showCollectionForm && (
           <button
-            className="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600"
+            className="px-3 py-1 bg-secondary text-white rounded hover:bg-accent transition"
             onClick={() => {
               setEditingCollection(null);
               setShowCollectionForm(true);
@@ -215,7 +200,6 @@ function App() {
           </button>
         )}
 
-        {/* Collection Form */}
         {showCollectionForm && (
           <CollectionForm
             collection={editingCollection}
@@ -232,52 +216,46 @@ function App() {
         <>
           {/* Prompts Section */}
           <div className="mt-6 mb-4">
-            {/* Prompts Header + New Button */}
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-2">
-                <div className="flex items-center gap-2">
-                  <h2 className="text-2xl font-bold">Prompts</h2>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-2">
+              <div className="flex items-center gap-2">
+                <h2 className="text-primary text-2xl font-bold">Prompts</h2>
 
-                  {/* New Prompt Button */}
-                  {!showPromptForm && (
-                    <button
-                      className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
-                      onClick={handleCreatePrompt}
-                    >
-                      New Prompt
-                    </button>
-                  )}
-                </div>
-
-                {/* Search Prompt Box */}
                 {!showPromptForm && (
-                  <input
-                    type="text"
-                    value={promptSearchQuery}
-                    onChange={(e) => setPromptSearchQuery(e.target.value)}
-                    placeholder="Search prompts..."
-                    className="border border-gray-300 p-1 rounded text-sm w-full sm:w-64 mt-2 sm:mt-0"
-                  />
+                  <button
+                    className="px-3 py-1 bg-secondary text-white rounded hover:bg-accent transition"
+                    onClick={handleCreatePrompt}
+                  >
+                    New Prompt
+                  </button>
                 )}
               </div>
 
-              {/* Prompt Form */}
-              {showPromptForm && (
-                <PromptForm
-                  prompt={editingPrompt}
-                  onSubmit={handleSubmitPrompt}
-                  onCancel={() => setShowPromptForm(false)}
-                  collections={collections}
+              {!showPromptForm && (
+                <input
+                  type="text"
+                  value={promptSearchQuery}
+                  onChange={(e) => setPromptSearchQuery(e.target.value)}
+                  placeholder="Search prompts..."
+                  className="border border-accent p-1 rounded text-sm text-primary w-full sm:w-64 mt-2 sm:mt-0"
                 />
               )}
+            </div>
 
-            {/* Prompt List */}
+            {showPromptForm && (
+              <PromptForm
+                prompt={editingPrompt}
+                onSubmit={handleSubmitPrompt}
+                onCancel={() => setShowPromptForm(false)}
+                collections={collections}
+              />
+            )}
+
             <PromptList
               prompts={filteredPrompts || []}
               onPromptEdit={handleEditPrompt}
               onPromptDelete={handleDeletePrompt}
             />
 
-            {/* Prompt Detail */}
             {selectedPrompt && (
               <PromptDetail
                 prompt={selectedPrompt}
