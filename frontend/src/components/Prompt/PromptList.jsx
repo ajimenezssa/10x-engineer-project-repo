@@ -34,8 +34,9 @@ function PromptList({ prompts, onPromptEditSubmit, onPromptDelete }) {
           {/* Expanded content */}
           {expandedPrompts[prompt.id] && (
             <div className="p-2 flex flex-col gap-2 bg-gray-50 rounded-b">
+
               {/* Edit/Delete buttons next to title inside expanded section */}
-              <div className="flex justify-end gap-2">
+              <div className="flex gap-2 justify-start mb-2">
                 <button
                   className="px-2 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600 text-sm"
                   onClick={() => setEditingPromptId(prompt.id)}
