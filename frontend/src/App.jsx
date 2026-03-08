@@ -33,6 +33,10 @@ function App() {
   const [selectedPrompt, setSelectedPrompt] = useState(null);
   const [showPromptForm, setShowPromptForm] = useState(false);
 
+  // --- Collection state ---
+  const [editingCollection, setEditingCollection] = useState(null);
+  const [showCollectionForm, setShowCollectionForm] = useState(false);
+
   // --- Collection filter ---
   const [selectedCollectionId, setSelectedCollectionId] = useState("");
 
@@ -60,12 +64,20 @@ function App() {
   }, []);
 
   // --- Collections CRUD ---
-  const handleAddCollection = async (newCollection) => {
+  const handleCreateCollection = () => {
+    setEditingCollection(null);
+    setShowCollectionForm(true);
+  };
+
+  const handleSubmitCollection = async (data) => {
     try {
-      const created = await createCollection(newCollection);
+      const created = await createCollection(data);
       setCollections((prev) => [...prev, created]);
     } catch (err) {
       alert("Failed to create collection: " + err.message);
+    } finally {
+      setShowCollectionForm(false);
+      setEditingCollection(null);
     }
   };
 
@@ -145,7 +157,26 @@ function App() {
     <Layout>
       {/* Collections Section */}
       <h2 className="text-2xl font-bold mb-4">Collections</h2>
-      <CollectionForm onSubmit={handleAddCollection} />
+
+      {/* Collection Button / Form */}
+      <div className="flex items-center gap-2 mb-4">
+        {!showCollectionForm && (
+          <button
+            className="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600"
+            onClick={handleCreateCollection}
+          >
+            New Collection
+          </button>
+        )}
+
+        {showCollectionForm && (
+          <CollectionForm
+            collection={editingCollection}
+            onSubmit={handleSubmitCollection}
+            onCancel={() => setShowCollectionForm(false)}
+          />
+        )}
+      </div>
 
       {loading && <LoadingSpinner />}
       {error && <ErrorMessage message={error} />}
@@ -159,24 +190,26 @@ function App() {
 
           {/* Prompts Section */}
           <div className="mt-6 mb-4">
-            {/* Filter */}
-            <h2 className="text-xl font-semibold mb-2">Filter</h2>
-            <select
-              className="border p-2 rounded mb-4"
-              value={selectedCollectionId}
-              onChange={(e) => setSelectedCollectionId(e.target.value)}
-            >
-              <option value="">All Collections</option>
-              {collections.map(c => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
+            {/* Prompts Header + Filter + New Button */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-2">
+              <div className="flex items-center gap-2">
+                <h2 className="text-2xl font-bold">Prompts</h2>
 
-            {/* Prompts Title + New Prompt Button */}
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-2xl font-bold">Prompts</h2>
+                {/* Collection Filter inline */}
+                <select
+                  className="border border-gray-300 p-1 rounded text-sm"
+                  value={selectedCollectionId}
+                  onChange={(e) => setSelectedCollectionId(e.target.value)}
+                >
+                  <option value="">All Collections</option>
+                  {collections.map(c => (
+                    <option key={c.id} value={c.id}>
+                      {c.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
               <button
                 className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
                 onClick={handleCreatePrompt}
