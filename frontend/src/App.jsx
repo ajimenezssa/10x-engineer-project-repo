@@ -8,6 +8,7 @@ import {
 import {
   getCollections,
   createCollection,
+  updateCollection,
   deleteCollection,
 } from "./api/collections";
 
@@ -64,7 +65,7 @@ function App() {
     try {
       let result;
       if (editingCollection) {
-        result = await createCollection({ ...editingCollection, ...data });
+        result = await updateCollection(editingCollection.id, data);
         setCollections((prev) =>
           prev.map((c) => (c.id === result.id ? result : c))
         );
