@@ -5,11 +5,11 @@ function Header() {
         {/* App Title */}
         <h1 className="text-xl font-bold">PromptLab</h1>
 
-        {/* Tiny Logo, smallest practical size */}
+        {/* Logo */}
         <img
-          src="/logo.png"
+          src="/logo.svg"
           alt="PromptLab Logo"
-          className="h-2 w-2 rounded-full align-middle"
+          className="h-10 w-10 rounded-full align-middle"
         />
       </div>
     </header>

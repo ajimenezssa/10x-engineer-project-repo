@@ -1,0 +1,39 @@
+<svg width="220" height="180" viewBox="0 0 220 180" xmlns="http://www.w3.org/2000/svg" fill="none">
+  
+  <!-- Central A shape -->
+  <path d="M110 20 
+           L165 140 
+           L140 140 
+           L125 110 
+           L95 110 
+           L80 140 
+           L55 140 
+           Z"
+        fill="white"/>
+
+  <!-- Inner triangle cut -->
+  <path d="M110 60 
+           L130 100 
+           L90 100 
+           Z"
+        fill="white"/>
+
+  <!-- Orbit 1 -->
+  <ellipse cx="110" cy="95" rx="95" ry="45"
+           stroke="white"
+           stroke-width="8"
+           fill="none"
+           transform="rotate(-20 110 95)" />
+
+  <!-- Orbit 2 -->
+  <ellipse cx="110" cy="95" rx="95" ry="45"
+           stroke="white"
+           stroke-width="8"
+           fill="none"
+           transform="rotate(35 110 95)" />
+
+  <!-- Orbit nodes -->
+  <circle cx="185" cy="85" r="7" fill="white"/>
+  <circle cx="45" cy="135" r="7" fill="white"/>
+
+</svg>
