@@ -6,7 +6,7 @@ from typing import Optional
 
 from app.models import (
     Prompt, PromptCreate, PromptUpdate,
-    Collection, CollectionCreate,
+    Collection, CollectionCreate, CollectionUpdate,
     PromptList, CollectionList, HealthResponse,
     get_current_time
 )
@@ -338,3 +338,29 @@ def delete_collection(collection_id: str):
     # Step 4: Return None, using status_code=204 to indicate success with no content.
     return None
 
+@app.put("/collections/{collection_id}", response_model=Collection)
+def update_collection(collection_id: str, collection_data: CollectionUpdate):
+    """Update an existing collection's name.
+
+    Args:
+        collection_id (str): The ID of the collection to update.
+        collection_data (CollectionUpdate): The updated collection data.
+
+    Returns:
+        Collection: The updated collection object.
+
+    Raises:
+        HTTPException: 
+            404 if the collection does not exist.
+    """
+    existing = storage.get_collection(collection_id)
+    if not existing:
+        raise HTTPException(status_code=404, detail="Collection not found")
+
+    # Update the fields
+    existing.name = collection_data.name
+    existing.description = collection_data.description  # important
+
+    # Save via storage
+    updated = storage.update_collection(collection_id, existing)
+    return updated

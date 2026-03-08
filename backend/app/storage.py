@@ -5,7 +5,7 @@ In a production environment, this would be replaced with a database.
 """
 
 from typing import Dict, List, Optional
-from app.models import Prompt, Collection
+from app.models import Prompt, Collection, get_current_time
 
 
 class Storage:
@@ -165,7 +165,35 @@ class Storage:
             >>> prompts = storage.get_prompts_by_collection("collection123")
         """
         return [p for p in self._prompts.values() if p.collection_id == collection_id]
-    
+
+    def update_collection(self, collection_id: str, updated_collection: Collection) -> Optional[Collection]:
+        """Updates an existing collection in storage
+
+        Args:
+            collection_id (str): The unique ID of the collection to update.
+            updated_collection (Collection): The collection object with updated data.
+
+        Returns:
+            Optional[Collection]: The updated collection object if successful; None if no collection with the given ID exists.
+
+        Example:
+            >>> existing = storage.get_collection("1234-uuid")
+            >>> existing.name = "New Collection Name"
+            >>> updated = storage.update_collection(existing.id, existing)
+        """
+
+        # Check if the collection exists
+        if collection_id not in self._collections:
+            return None
+
+        # Preserve the original creation timestamp
+        updated_collection.created_at = self._collections[collection_id].created_at
+
+        # Update the collection
+        self._collections[collection_id] = updated_collection
+
+        return updated_collection
+
     # ============== Utility ==============
     
     def clear(self):

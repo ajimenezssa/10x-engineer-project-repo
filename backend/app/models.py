@@ -102,6 +102,14 @@ class CollectionBase(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
+class CollectionUpdate(BaseModel):
+    """Model for updating a Collection."""
+    
+    name: str = Field(..., min_length=1, max_length=100)
+    description: Optional[str] = Field(None, max_length=500)
+
+    model_config = ConfigDict(from_attributes=True)
+
 
 class CollectionCreate(CollectionBase):
     """Model for creating a new Collection, inheriting from CollectionBase."""
