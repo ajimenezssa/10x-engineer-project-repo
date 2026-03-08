@@ -40,6 +40,9 @@ function App() {
   // --- Collection filter ---
   const [selectedCollectionId, setSelectedCollectionId] = useState("");
 
+  // --- Prompt search ---
+  const [promptSearchQuery, setPromptSearchQuery] = useState("");
+
   // --- Fetch prompts and collections ---
   useEffect(() => {
     async function fetchData() {
@@ -149,9 +152,9 @@ function App() {
   };
 
   // --- Filter prompts ---
-  const filteredPrompts = selectedCollectionId
-    ? prompts.filter(p => p.collection?.id === selectedCollectionId)
-    : prompts;
+  const filteredPrompts = prompts
+    .filter(p => !selectedCollectionId || p.collection?.id === selectedCollectionId)
+    .filter(p => p.title.toLowerCase().includes(promptSearchQuery.toLowerCase()));
 
   return (
     <Layout>
@@ -192,32 +195,42 @@ function App() {
           <div className="mt-6 mb-4">
             {/* Prompts Header + Filter + New Button */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-2">
-              <div className="flex items-center gap-2">
-                <h2 className="text-2xl font-bold">Prompts</h2>
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center gap-2">
+                  <h2 className="text-2xl font-bold">Prompts</h2>
 
-                {/* Collection Filter inline */}
-                <select
-                  className="border border-gray-300 p-1 rounded text-sm"
-                  value={selectedCollectionId}
-                  onChange={(e) => setSelectedCollectionId(e.target.value)}
-                >
-                  <option value="">All Collections</option>
-                  {collections.map(c => (
-                    <option key={c.id} value={c.id}>
-                      {c.name}
-                    </option>
-                  ))}
-                </select>
+                  {/* Collection Filter inline */}
+                  <select
+                    className="border border-gray-300 p-1 rounded text-sm"
+                    value={selectedCollectionId}
+                    onChange={(e) => setSelectedCollectionId(e.target.value)}
+                  >
+                    <option value="">All Collections</option>
+                    {collections.map(c => (
+                      <option key={c.id} value={c.id}>
+                        {c.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Search Prompt below filter */}
+                <input
+                  type="text"
+                  value={promptSearchQuery}
+                  onChange={(e) => setPromptSearchQuery(e.target.value)}
+                  placeholder="Search prompts..."
+                  className="border border-gray-300 p-1 rounded text-sm w-full sm:w-64"
+                />
               </div>
 
               <button
-                className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
+                className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 mt-2 sm:mt-0"
                 onClick={handleCreatePrompt}
               >
                 New Prompt
               </button>
             </div>
-
             {/* Prompt Form */}
             {showPromptForm && (
               <PromptForm
