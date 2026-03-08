@@ -224,12 +224,15 @@ function App() {
                 />
               </div>
 
-              <button
-                className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 mt-2 sm:mt-0"
-                onClick={handleCreatePrompt}
-              >
-                New Prompt
-              </button>
+              {/* New Prompt Button - only show if form is not visible */}
+              {!showPromptForm && (
+                <button
+                  className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 mt-2 sm:mt-0"
+                  onClick={handleCreatePrompt}
+                >
+                  New Prompt
+                </button>
+              )}
             </div>
             {/* Prompt Form */}
             {showPromptForm && (
